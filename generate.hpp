@@ -15,4 +15,8 @@ std::vector<std::vector<double>> calculate_distances(const int &num_nodes, const
 
 std::vector<std::vector<double>> calculate_populations(const int &num_nodes, const int &num_periods, const double &min_value, const double &max_value);
 
+void generate_test_instance(const unsigned &i, const unsigned &j, const unsigned &t, const unsigned &s, const unsigned &p);
+
+std::string format_filename(const unsigned &i, const unsigned &j, const unsigned &t, const unsigned &s, const unsigned &p);
+
 #endif

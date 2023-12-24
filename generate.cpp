@@ -1,5 +1,9 @@
 #include <random>
+#include <sstream>
+#include <iostream>
+#include <fstream>
 
+#include "model_instance.hpp"
 #include "generate.hpp"
 
 double euclidean_distance(const std::pair<double, double> &point1, const std::pair<double, double> &point2) {
@@ -70,4 +74,37 @@ std::vector<std::vector<double>> calculate_populations(const int &num_nodes, con
 	}
 	
 	return populations;
+}
+
+void generate_test_instance(const unsigned &i, const unsigned &j, const unsigned &t, const unsigned &s, const unsigned &p) {
+	ModelInstance instance(i, j, t, s, p);
+	
+	std::string filename = format_filename(i, j, t, s, p);
+	
+	std::ofstream file(filename);
+	
+	if (!file.is_open()) {
+		throw std::runtime_error("Error opening file!");
+	}
+	
+	file << instance;
+	
+	file.close();
+}
+
+std::string format_filename(const unsigned &i, const unsigned &j, const unsigned &t, const unsigned &s, const unsigned &p) {
+	std::stringstream buffer;
+	
+	buffer << i;
+	buffer << "_";
+	buffer << j;
+	buffer << "_";
+	buffer << t;
+	buffer << "_";
+	buffer << s;
+	buffer << "_";
+	buffer << p;
+	buffer << ".txt";
+	
+	return buffer.str();
 }

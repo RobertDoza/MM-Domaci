@@ -7,13 +7,13 @@ CPPFLAGS = -Wall -Wextra -Werror -pedantic
 $(EXECUTABLE): $(MAIN).o $(GENERATE).o $(MODEL_INSTANCE).o
 	g++ $^ -o $@
 
-$(MAIN).o: $(MAIN).cpp $(MODEL_INSTANCE).hpp
+$(MAIN).o: $(MAIN).cpp $(MODEL_INSTANCE).hpp $(GENERATE).hpp
 	g++ $< -c -o $@ $(CPPFLAGS)
 
-$(GENERATE).o: $(GENERATE).cpp $(GENERATE).hpp
+$(GENERATE).o: $(GENERATE).cpp $(GENERATE).hpp $(MODEL_INSTANCE).hpp
 	g++ $< -c -o $@ $(CPPFLAGS)
 
-$(MODEL_INSTANCE).o: $(MODEL_INSTANCE).cpp $(MODEL_INSTANCE).hpp
+$(MODEL_INSTANCE).o: $(MODEL_INSTANCE).cpp $(MODEL_INSTANCE).hpp $(GENERATE).hpp
 	g++ $< -c -o $@ $(CPPFLAGS)
 
 .PHONY: clean
