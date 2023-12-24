@@ -1,19 +1,15 @@
 EXECUTABLE = test
 MAIN = main
 GENERATE = generate
-MODEL_INSTANCE = model_instance
 CPPFLAGS = -Wall -Wextra -Werror -pedantic
 
-$(EXECUTABLE): $(MAIN).o $(GENERATE).o $(MODEL_INSTANCE).o
+$(EXECUTABLE): $(MAIN).o $(GENERATE).o
 	g++ $^ -o $@
 
-$(MAIN).o: $(MAIN).cpp $(MODEL_INSTANCE).hpp $(GENERATE).hpp
+$(MAIN).o: $(MAIN).cpp $(GENERATE).hpp
 	g++ $< -c -o $@ $(CPPFLAGS)
 
-$(GENERATE).o: $(GENERATE).cpp $(GENERATE).hpp $(MODEL_INSTANCE).hpp
-	g++ $< -c -o $@ $(CPPFLAGS)
-
-$(MODEL_INSTANCE).o: $(MODEL_INSTANCE).cpp $(MODEL_INSTANCE).hpp $(GENERATE).hpp
+$(GENERATE).o: $(GENERATE).cpp $(GENERATE).hpp
 	g++ $< -c -o $@ $(CPPFLAGS)
 
 .PHONY: clean

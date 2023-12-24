@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "generate.hpp"
-#include "model_instance.hpp"
 
 constexpr int I = 5;
 constexpr int J = 5;
