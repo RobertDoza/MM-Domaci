@@ -5,12 +5,6 @@
 
 #include "generate.hpp"
 
-constexpr double dist_min_value = 0.0;
-constexpr double dist_max_value = 30.0;
-
-constexpr double pop_min_value = 0.0;
-constexpr double pop_max_value = 100.0;
-
 double euclidean_distance(const std::pair<double, double> &point1, const std::pair<double, double> &point2) {
 	double x1 = point1.first;
 	double y1 = point1.second;
@@ -22,69 +16,10 @@ double euclidean_distance(const std::pair<double, double> &point1, const std::pa
 	return distance;
 }
 
-std::vector<std::pair<double, double>> calculate_locations(const int &num_nodes, const double &min_value, const double &max_value) {
-	std::random_device rd;
+void generate_test_instance(const ModelParameters &mp, const GenerationParameters &gp) {
+	ModelInstance instance(mp, gp);
 	
-	std::default_random_engine engine(rd());
-	
-	std::uniform_real_distribution<double> distribution(min_value, max_value);
-	
-	std::vector<std::pair<double, double>> locations;
-	
-	for (int i = 0; i < num_nodes; i++) {
-		double x = distribution(engine);
-		double y = distribution(engine);
-		locations.push_back({x, y});
-	}
-	
-	return locations;
-}
-
-std::vector<std::vector<double>> calculate_distances(const std::vector<std::pair<double, double>> &locations) {
-	int size = locations.size();
-
-	std::vector<std::vector<double>> distances(size, std::vector<double>(size));
-	
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < i + 1; j++) {
-			double distance = euclidean_distance(locations[i], locations[j]);
-			distances[i][j] = distances[j][i] = distance;
-		}
-	}
-	
-	return distances;
-}
-
-std::vector<std::vector<double>> calculate_distances(const int &num_nodes, const double &min_value, const double &max_value) {
-	std::vector<std::pair<double, double>> locations = calculate_locations(num_nodes, min_value, max_value);
-	
-	std::vector<std::vector<double>> distances = calculate_distances(locations);
-	
-	return distances;
-}
-
-std::vector<std::vector<double>> calculate_populations(const int &num_nodes, const int &num_periods, const double &min_value, const double &max_value) {
-	std::random_device rd;
-	
-	std::default_random_engine engine(rd());
-	
-	std::uniform_real_distribution<double> distribution(min_value, max_value);
-	
-	std::vector<std::vector<double>> populations(num_nodes, std::vector<double>(num_periods));
-	
-	for (int i = 0; i < num_nodes; i++) {
-		for (int j = 0; j < num_periods; j++) {
-			populations[i][j] = distribution(engine);
-		}
-	}
-	
-	return populations;
-}
-
-void generate_test_instance(const unsigned &i, const unsigned &j, const unsigned &t, const unsigned &s, const unsigned &p) {
-	ModelInstance instance(i, j, t, s, p);
-	
-	std::string filename = format_filename(i, j, t, s, p);
+	std::string filename = format_filename(mp);
 	
 	std::ofstream file(filename);
 	
@@ -97,28 +32,29 @@ void generate_test_instance(const unsigned &i, const unsigned &j, const unsigned
 	file.close();
 }
 
-std::string format_filename(const unsigned &i, const unsigned &j, const unsigned &t, const unsigned &s, const unsigned &p) {
+std::string format_filename(const ModelParameters &parameters) {
 	std::stringstream buffer;
 	
-	buffer << i;
+	buffer << parameters.i;
 	buffer << "_";
-	buffer << j;
+	buffer << parameters.j;
 	buffer << "_";
-	buffer << t;
+	buffer << parameters.t;
 	buffer << "_";
-	buffer << s;
+	buffer << parameters.s;
 	buffer << "_";
-	buffer << p;
+	buffer << parameters.p;
 	buffer << ".txt";
 	
 	return buffer.str();
 }
 
-ModelInstance::ModelInstance(const unsigned &i, const unsigned &j, const unsigned &t, const unsigned &s, const unsigned &p)
-	:_num_nodes(i), _num_facilities(j), _num_periods(t), _coverage_radius(s), _total_facilities(p)
+ModelInstance::ModelInstance(const ModelParameters &p, const GenerationParameters &g)
+	:_num_nodes(p.i), _num_facilities(p.j), _num_periods(p.t), _coverage_radius(p.s), _total_facilities(p.p),
+	_population_matrix(p.i, std::vector<double>(p.t)), _distance_matrix(p.i, std::vector<double>(p.i))
 {
-	_population_matrix = calculate_populations(_num_nodes, _num_periods, pop_min_value, pop_max_value);
-	_distance_matrix = calculate_distances(_num_nodes, dist_min_value, dist_max_value);
+	initialize_populations(g.pop_min_value, g.pop_max_value);
+	initialize_distances(g.dist_min_value, g.dist_max_value);
 }
 
 std::ostream& operator << (std::ostream &o, const ModelInstance &i) {
@@ -151,4 +87,49 @@ std::string ModelInstance::to_string() const {
 	}
 	
 	return buffer.str();
+}
+
+void ModelInstance::initialize_populations(const double &min_value, const double &max_value) {
+	std::random_device rd;
+	
+	std::default_random_engine engine(rd());
+	
+	std::uniform_real_distribution<double> distribution(min_value, max_value);
+	
+	for (unsigned i = 0; i < _num_nodes; i++) {
+		for (unsigned j = 0; j < _num_periods; j++) {
+			_population_matrix[i][j] = distribution(engine);
+		}
+	}
+}
+
+void ModelInstance::initialize_distances(const double &min_value, const double &max_value) {
+	std::vector<std::pair<double, double>> locations = calculate_locations(_num_nodes, min_value, max_value);
+	
+	int size = locations.size();
+	
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < i + 1; j++) {
+			double distance = euclidean_distance(locations[i], locations[j]);
+			_distance_matrix[i][j] = _distance_matrix[j][i] = distance;
+		}
+	}
+}
+
+std::vector<std::pair<double, double>> ModelInstance::calculate_locations(const int &num_nodes, const double &min_value, const double &max_value) {
+	std::random_device rd;
+	
+	std::default_random_engine engine(rd());
+	
+	std::uniform_real_distribution<double> distribution(min_value, max_value);
+	
+	std::vector<std::pair<double, double>> locations;
+	
+	for (int i = 0; i < num_nodes; i++) {
+		double x = distribution(engine);
+		double y = distribution(engine);
+		locations.push_back({x, y});
+	}
+	
+	return locations;
 }

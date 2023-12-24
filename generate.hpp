@@ -7,23 +7,31 @@
 #include <vector>
 #include <ostream>
 
+struct ModelParameters {
+	unsigned i;
+	unsigned j;
+	unsigned t;
+	unsigned s;
+	unsigned p;
+};
+
+struct GenerationParameters {
+	double dist_min_value;
+	double dist_max_value;
+	
+	double pop_min_value;
+	double pop_max_value;
+};
+
 double euclidean_distance(const std::pair<double, double> &point1, const std::pair<double, double> &point2);
 
-std::vector<std::pair<double, double>> calculate_locations(const int &num_nodes, const double &min_value, const double &max_value);
+void generate_test_instance(const ModelParameters&, const GenerationParameters&);
 
-std::vector<std::vector<double>> calculate_distances(const std::vector<std::pair<double, double>> &locations);
-
-std::vector<std::vector<double>> calculate_distances(const int &num_nodes, const double &min_value, const double &max_value);
-
-std::vector<std::vector<double>> calculate_populations(const int &num_nodes, const int &num_periods, const double &min_value, const double &max_value);
-
-void generate_test_instance(const unsigned &i, const unsigned &j, const unsigned &t, const unsigned &s, const unsigned &p);
-
-std::string format_filename(const unsigned &i, const unsigned &j, const unsigned &t, const unsigned &s, const unsigned &p);
+std::string format_filename(const ModelParameters&);
 
 class ModelInstance {
 	public:
-		ModelInstance(const unsigned&, const unsigned&, const unsigned&, const unsigned&, const unsigned&);
+		ModelInstance(const ModelParameters&, const GenerationParameters&);
 		
 		friend std::ostream& operator << (std::ostream&, const ModelInstance&);
 	private:
@@ -36,6 +44,9 @@ class ModelInstance {
 		std::vector<std::vector<double>> _distance_matrix;
 		
 		std::string to_string() const;
+		void initialize_populations(const double &min_value, const double &max_value);
+		void initialize_distances(const double &min_value, const double &max_value);
+		static std::vector<std::pair<double, double>> calculate_locations(const int &num_nodes, const double &min_value, const double &max_value);
 };
 
 #endif
