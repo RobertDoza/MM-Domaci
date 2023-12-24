@@ -13,6 +13,6 @@ std::vector<std::vector<double>> calculate_distances(const std::vector<std::pair
 
 std::vector<std::vector<double>> calculate_distances(const int &num_nodes, const double &min_value, const double &max_value);
 
-std::vector<std::vector<int>> calculate_populations(const int &num_nodes, const int &num_periods, const double &min_value, const double &max_value);
+std::vector<std::vector<double>> calculate_populations(const int &num_nodes, const int &num_periods, const double &min_value, const double &max_value);
 
 #endif

@@ -54,18 +54,18 @@ std::vector<std::vector<double>> calculate_distances(const int &num_nodes, const
 	return distances;
 }
 
-std::vector<std::vector<int>> calculate_populations(const int &num_nodes, const int &num_periods, const double &min_value, const double &max_value) {
+std::vector<std::vector<double>> calculate_populations(const int &num_nodes, const int &num_periods, const double &min_value, const double &max_value) {
 	std::random_device rd;
 	
 	std::default_random_engine engine(rd());
 	
 	std::uniform_real_distribution<double> distribution(min_value, max_value);
 	
-	std::vector<std::vector<int>> populations(num_nodes, std::vector<int>(num_periods));
+	std::vector<std::vector<double>> populations(num_nodes, std::vector<double>(num_periods));
 	
 	for (int i = 0; i < num_nodes; i++) {
 		for (int j = 0; j < num_periods; j++) {
-			populations[i][j] = std::round(distribution(engine));
+			populations[i][j] = distribution(engine);
 		}
 	}
 	
