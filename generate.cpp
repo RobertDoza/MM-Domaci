@@ -55,6 +55,22 @@ void generate_test_instance(const ModelParameters &mp, const GenerationParameter
 	file.close();
 }
 
+void generate_cplex_test_instance(const ModelParameters &mp, const GenerationParameters &gp) {
+	ModelInstance instance(mp, gp);
+	
+	std::string filename = format_filename(mp);
+	
+	std::ofstream file(filename);
+	
+	if (!file.is_open()) {
+		throw std::runtime_error("Error opening file!");
+	}
+	
+	file << instance.to_cplex_string();
+	
+	file.close();
+}
+
 std::string format_filename(const ModelParameters &parameters) {
 	std::stringstream buffer;
 	
@@ -137,6 +153,68 @@ std::string ModelInstance::to_string() const {
 		}
 		buffer << "\n";
 	}
+	
+	return buffer.str();
+}
+
+std::string ModelInstance::to_cplex_string() const {
+	std::stringstream buffer;
+	
+	buffer << "I = " << _num_nodes << ";\n";
+	buffer << "J = " << _num_facilities << ";\n";
+	buffer << "T = " << _num_periods << ";\n";
+	buffer << "S = " << _coverage_radius << ";\n";
+	buffer << "p = " << _total_facilities << ";\n";
+	
+	bool add_comma, add_inner_comma;
+	
+	add_comma = false;
+	buffer << "pop = [";
+	for (const std::vector<double> &row : _population_matrix) {
+		if (add_comma) {
+			buffer << ",";
+		}
+		
+		add_inner_comma = false;
+		buffer << "\n\t[";
+		for (const double &value : row) {
+			if (add_inner_comma) {
+				buffer << ", ";
+			}
+			
+			buffer << value;
+			
+			add_inner_comma = true;
+		}
+		buffer << "]";
+		
+		add_comma = true;
+	}
+	buffer << "\n];\n";
+	
+	add_comma = false;
+	buffer << "dist = [";
+	for (const std::vector<double> &row : _distance_matrix) {
+		if (add_comma) {
+			buffer << ",";
+		}
+		
+		add_inner_comma = false;
+		buffer << "\n\t[";
+		for (const double &value : row) {
+			if (add_inner_comma) {
+				buffer << ", ";
+			}
+			
+			buffer << value;
+			
+			add_inner_comma = true;
+		}
+		buffer << "]";
+		
+		add_comma = true;
+	}
+	buffer << "\n];\n";
 	
 	return buffer.str();
 }

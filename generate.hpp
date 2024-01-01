@@ -26,6 +26,8 @@ class ModelInstance {
 	public:
 		ModelInstance(const ModelParameters&, const GenerationParameters&);
 		
+		std::string to_cplex_string() const;
+		
 		friend std::ostream& operator << (std::ostream&, const ModelInstance&);
 	private:
 		unsigned _num_nodes;
@@ -46,6 +48,8 @@ void generate_test_instances(const GenerationParameters&);
 std::vector<ModelParameters> read_parameters_from_file(const std::string &filename);
 
 void generate_test_instance(const ModelParameters&, const GenerationParameters&);
+
+void generate_cplex_test_instance(const ModelParameters&, const GenerationParameters&);
 
 std::string format_filename(const ModelParameters&);
 
