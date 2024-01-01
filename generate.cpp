@@ -2,22 +2,27 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
 #include "generate.hpp"
 
+constexpr int precision = 5;
+
 void generate_test_instances(const GenerationParameters &generation_parameters) {
-	std::vector<ModelParameters> parameters = read_parameters_from_file("Input/parameters.txt");
+	std::vector<ModelParameters> parameters = read_parameters_from_file("Input/parameters_1800.txt");
 	
+	std::cout << "                    \tI\tJ\tT\tS\tp\n";
 	for (const ModelParameters &model_parameters : parameters) {
 		std::cout
-			<< "\rgenerating: "
+			<< "\rgenerating instance:\t"
 			<< model_parameters.i << "\t"
 			<< model_parameters.j << "\t"
 			<< model_parameters.t << "\t"
 			<< model_parameters.s << "\t"
-			<< model_parameters.p << "\n";
-		generate_test_instance(model_parameters, generation_parameters);
+			<< model_parameters.p << std::flush;
+		generate_cplex_test_instance(model_parameters, generation_parameters);
 	}
+	std::cout << "\n";
 }
 
 std::vector<ModelParameters> read_parameters_from_file(const std::string &filename) {
@@ -59,8 +64,9 @@ void generate_cplex_test_instance(const ModelParameters &mp, const GenerationPar
 	ModelInstance instance(mp, gp);
 	
 	std::string filename = format_filename(mp);
+	std::string path = "Input/" + filename;
 	
-	std::ofstream file(filename);
+	std::ofstream file(path);
 	
 	if (!file.is_open()) {
 		throw std::runtime_error("Error opening file!");
@@ -134,6 +140,8 @@ std::ostream& operator << (std::ostream &o, const ModelInstance &i) {
 std::string ModelInstance::to_string() const {
 	std::stringstream buffer;
 	
+	buffer << std::setprecision(precision) << std::fixed;
+	
 	buffer << _num_nodes << " ";
 	buffer << _num_facilities << " ";
 	buffer << _num_periods << " ";
@@ -165,6 +173,8 @@ std::string ModelInstance::to_cplex_string() const {
 	buffer << "T = " << _num_periods << ";\n";
 	buffer << "S = " << _coverage_radius << ";\n";
 	buffer << "p = " << _total_facilities << ";\n";
+	
+	buffer << std::setprecision(precision) << std::fixed;
 	
 	bool add_comma, add_inner_comma;
 	
