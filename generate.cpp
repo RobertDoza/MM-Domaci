@@ -8,25 +8,40 @@
 
 constexpr int precision = 5;
 
-void generate_test_instances(const GenerationParameters &generation_parameters) {
-	std::vector<ModelParameters> parameters = read_parameters_from_file("Input/parameters_1800.txt");
+void generate_test_instances(const std::string &path, const GenerationParameters &generation_parameters) {
+	std::vector<ModelParameters> parameters = read_parameters_from_file(path);
 	
 	std::cout << "                    \tI\tJ\tT\tS\tp\n";
 	for (const ModelParameters &model_parameters : parameters) {
 		std::cout
-			<< "\rgenerating instance:\t"
+			<< "generating instance:\t"
 			<< model_parameters.i << "\t"
 			<< model_parameters.j << "\t"
 			<< model_parameters.t << "\t"
 			<< model_parameters.s << "\t"
-			<< model_parameters.p << std::flush;
-		generate_cplex_test_instance(model_parameters, generation_parameters);
+			<< model_parameters.p << "\n";
+		generate_test_instance(model_parameters, generation_parameters);
 	}
-	std::cout << "\n";
 }
 
-std::vector<ModelParameters> read_parameters_from_file(const std::string &filename) {
-	std::ifstream file(filename);
+void generate_cplex_test_instances(const std::string &path, const GenerationParameters &generation_parameters) {
+	std::vector<ModelParameters> parameters = read_parameters_from_file(path);
+	
+	std::cout << "                    \tI\tJ\tT\tS\tp\n";
+	for (const ModelParameters &model_parameters : parameters) {
+		std::cout
+			<< "generating instance:\t"
+			<< model_parameters.i << "\t"
+			<< model_parameters.j << "\t"
+			<< model_parameters.t << "\t"
+			<< model_parameters.s << "\t"
+			<< model_parameters.p << "\n";
+		generate_cplex_test_instance(model_parameters, generation_parameters);
+	}
+}
+
+std::vector<ModelParameters> read_parameters_from_file(const std::string &path) {
+	std::ifstream file(path);
 	
 	if (!file.is_open()) {
 		throw std::runtime_error("Error reading from file!");
@@ -44,12 +59,13 @@ std::vector<ModelParameters> read_parameters_from_file(const std::string &filena
 	return parameters;
 }
 
-void generate_test_instance(const ModelParameters &mp, const GenerationParameters &gp) {
+void generate_test_instance(const ModelParameters &mp, const GenerationParameters &gp, const std::string &output_dir) {
 	ModelInstance instance(mp, gp);
 	
-	std::string filename = format_filename(mp);
+	std::string filename = format_instance_filename(mp);
+	std::string path = output_dir + "/" + filename;
 	
-	std::ofstream file(filename);
+	std::ofstream file(path);
 	
 	if (!file.is_open()) {
 		throw std::runtime_error("Error opening file!");
@@ -60,11 +76,11 @@ void generate_test_instance(const ModelParameters &mp, const GenerationParameter
 	file.close();
 }
 
-void generate_cplex_test_instance(const ModelParameters &mp, const GenerationParameters &gp) {
+void generate_cplex_test_instance(const ModelParameters &mp, const GenerationParameters &gp, const std::string &output_dir) {
 	ModelInstance instance(mp, gp);
 	
-	std::string filename = format_filename(mp);
-	std::string path = "Input/" + filename;
+	std::string filename = format_cplex_instance_filename(mp);
+	std::string path = output_dir + "/" + filename;
 	
 	std::ofstream file(path);
 	
@@ -89,9 +105,16 @@ std::string format_filename(const ModelParameters &parameters) {
 	buffer << parameters.s;
 	buffer << "_";
 	buffer << parameters.p;
-	buffer << ".txt";
 	
 	return buffer.str();
+}
+
+std::string format_instance_filename(const ModelParameters &parameters) {
+	return format_filename(parameters) + ".txt";
+}
+
+std::string format_cplex_instance_filename(const ModelParameters &parameters) {
+	return format_filename(parameters) + ".dat";
 }
 
 double euclidean_distance(const std::pair<double, double> &point1, const std::pair<double, double> &point2) {
@@ -140,24 +163,24 @@ std::ostream& operator << (std::ostream &o, const ModelInstance &i) {
 std::string ModelInstance::to_string() const {
 	std::stringstream buffer;
 	
-	buffer << std::setprecision(precision) << std::fixed;
-	
 	buffer << _num_nodes << " ";
 	buffer << _num_facilities << " ";
 	buffer << _num_periods << " ";
 	buffer << _coverage_radius << " ";
 	buffer << _total_facilities << "\n";
 	
+	buffer << std::setprecision(precision) << std::fixed;
+	
 	for (const std::vector<double> &row : _population_matrix) {
 		for (const double &value : row) {
-			buffer << value << "\t";
+			buffer << value << " ";
 		}
 		buffer << "\n";
 	}
 	
 	for (const std::vector<double> &row : _distance_matrix) {
 		for (const double &value : row) {
-			buffer << value << "\t";
+			buffer << value << " ";
 		}
 		buffer << "\n";
 	}

@@ -43,15 +43,21 @@ class ModelInstance {
 		void initialize_distances(const double&, const double&);
 };
 
-void generate_test_instances(const GenerationParameters&);
+void generate_test_instances(const std::string&, const GenerationParameters& = {0.0, 30.0, 0.0, 100.0});
 
-std::vector<ModelParameters> read_parameters_from_file(const std::string &filename);
+void generate_cplex_test_instances(const std::string&, const GenerationParameters& = {0.0, 30.0, 0.0, 100.0});
 
-void generate_test_instance(const ModelParameters&, const GenerationParameters&);
+std::vector<ModelParameters> read_parameters_from_file(const std::string&);
 
-void generate_cplex_test_instance(const ModelParameters&, const GenerationParameters&);
+void generate_test_instance(const ModelParameters&, const GenerationParameters&, const std::string& = "Output");
+
+void generate_cplex_test_instance(const ModelParameters&, const GenerationParameters&, const std::string& = "Output");
 
 std::string format_filename(const ModelParameters&);
+
+std::string format_instance_filename(const ModelParameters&);
+
+std::string format_cplex_instance_filename(const ModelParameters&);
 
 double euclidean_distance(const std::pair<double, double>&, const std::pair<double, double>&);
 
