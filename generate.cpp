@@ -20,23 +20,11 @@ void generate_test_instances(const std::string &path, const GenerationParameters
 			<< model_parameters.t << "\t"
 			<< model_parameters.s << "\t"
 			<< model_parameters.p << "\n";
-		generate_test_instance(model_parameters, generation_parameters);
-	}
-}
-
-void generate_cplex_test_instances(const std::string &path, const GenerationParameters &generation_parameters) {
-	std::vector<ModelParameters> parameters = read_parameters_from_file(path);
-	
-	std::cout << "                    \tI\tJ\tT\tS\tp\n";
-	for (const ModelParameters &model_parameters : parameters) {
-		std::cout
-			<< "generating instance:\t"
-			<< model_parameters.i << "\t"
-			<< model_parameters.j << "\t"
-			<< model_parameters.t << "\t"
-			<< model_parameters.s << "\t"
-			<< model_parameters.p << "\n";
-		generate_cplex_test_instance(model_parameters, generation_parameters);
+		
+		ModelInstance instance(model_parameters, generation_parameters);
+		
+		generate_cpp_test_instance(instance);
+		generate_cplex_test_instance(instance);
 	}
 }
 
@@ -59,10 +47,8 @@ std::vector<ModelParameters> read_parameters_from_file(const std::string &path) 
 	return parameters;
 }
 
-void generate_test_instance(const ModelParameters &mp, const GenerationParameters &gp, const std::string &output_dir) {
-	ModelInstance instance(mp, gp);
-	
-	std::string filename = format_instance_filename(mp);
+void generate_cpp_test_instance(const ModelInstance &instance, const std::string &output_dir) {
+	std::string filename = format_cpp_instance_filename(instance.get_model_parameters());
 	std::string path = output_dir + "/" + filename;
 	
 	std::ofstream file(path);
@@ -76,10 +62,8 @@ void generate_test_instance(const ModelParameters &mp, const GenerationParameter
 	file.close();
 }
 
-void generate_cplex_test_instance(const ModelParameters &mp, const GenerationParameters &gp, const std::string &output_dir) {
-	ModelInstance instance(mp, gp);
-	
-	std::string filename = format_cplex_instance_filename(mp);
+void generate_cplex_test_instance(const ModelInstance &instance, const std::string &output_dir) {
+	std::string filename = format_cplex_instance_filename(instance.get_model_parameters());
 	std::string path = output_dir + "/" + filename;
 	
 	std::ofstream file(path);
@@ -109,7 +93,7 @@ std::string format_filename(const ModelParameters &parameters) {
 	return buffer.str();
 }
 
-std::string format_instance_filename(const ModelParameters &parameters) {
+std::string format_cpp_instance_filename(const ModelParameters &parameters) {
 	return format_filename(parameters) + ".txt";
 }
 
@@ -250,6 +234,10 @@ std::string ModelInstance::to_cplex_string() const {
 	buffer << "\n];\n";
 	
 	return buffer.str();
+}
+
+ModelParameters ModelInstance::get_model_parameters() const {
+	return {_num_nodes, _num_facilities, _num_periods, _coverage_radius, _total_facilities};
 }
 
 void ModelInstance::initialize_populations(const double &min_value, const double &max_value) {

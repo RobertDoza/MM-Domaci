@@ -22,11 +22,15 @@ struct GenerationParameters {
 	double pop_max_value;
 };
 
+constexpr GenerationParameters default_generation_parameters = {0.0, 30.0, 0.0, 100.0};
+constexpr std::string_view default_output_directory = "Output";
+
 class ModelInstance {
 	public:
 		ModelInstance(const ModelParameters&, const GenerationParameters&);
 		
 		std::string to_cplex_string() const;
+		ModelParameters get_model_parameters() const;
 		
 		friend std::ostream& operator << (std::ostream&, const ModelInstance&);
 	private:
@@ -43,19 +47,17 @@ class ModelInstance {
 		void initialize_distances(const double&, const double&);
 };
 
-void generate_test_instances(const std::string&, const GenerationParameters& = {0.0, 30.0, 0.0, 100.0});
-
-void generate_cplex_test_instances(const std::string&, const GenerationParameters& = {0.0, 30.0, 0.0, 100.0});
+void generate_test_instances(const std::string&, const GenerationParameters& = default_generation_parameters);
 
 std::vector<ModelParameters> read_parameters_from_file(const std::string&);
 
-void generate_test_instance(const ModelParameters&, const GenerationParameters&, const std::string& = "Output");
+void generate_cpp_test_instance(const ModelInstance&, const std::string& = std::string(default_output_directory));
 
-void generate_cplex_test_instance(const ModelParameters&, const GenerationParameters&, const std::string& = "Output");
+void generate_cplex_test_instance(const ModelInstance&, const std::string& = std::string(default_output_directory));
 
 std::string format_filename(const ModelParameters&);
 
-std::string format_instance_filename(const ModelParameters&);
+std::string format_cpp_instance_filename(const ModelParameters&);
 
 std::string format_cplex_instance_filename(const ModelParameters&);
 
